@@ -45,3 +45,9 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+
+// compute the fibonacci number
+fun fib(n: Int): Int {
+    if (n <= 1) return n
+    return fib(n - 1) + fib(n - 2)
+}

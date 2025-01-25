@@ -9,14 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class NotesScreenViewModel: ViewModel() {
-    private val _notes = MutableStateFlow<List<NotePage>>(emptyList())
+    private val _notes = MutableStateFlow(emptyList<NotePage>())
     val notes: StateFlow<List<NotePage>> = _notes
 
     init {
         viewModelScope.launch {
-            NotePagesRepository.notePages.collect {
+            NotePagesRepository.notes.collect {
                 _notes.value = it
             }
         }
     }
+
 }

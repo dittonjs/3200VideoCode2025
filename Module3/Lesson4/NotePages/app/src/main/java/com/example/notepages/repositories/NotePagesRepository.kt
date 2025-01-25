@@ -5,24 +5,57 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 object NotePagesRepository {
-    private val _notePages = MutableStateFlow(emptyList<NotePage>())
-    val notePages: StateFlow<List<NotePage>> = _notePages
+    private var idCounter = 0
+    private val _notes = MutableStateFlow(emptyList<NotePage>())
+    val notes: StateFlow<List<NotePage>> = _notes
 
-    fun addNotePage(notePage: NotePage) {
-        _notePages.value += notePage
+    init {
+        addNotePage(
+            title = "First Note",
+            content = "This is the first note."
+        )
+        addNotePage(
+            title = "Second Note",
+            content = "This is the second note."
+        )
     }
 
-    fun removeNotePage(notePage: NotePage) {
-        _notePages.value -= notePage
+    fun addNotePage(
+        title: String,
+        content: String
+    ) {
+        val newNotePage = NotePage(
+            id = ++idCounter,
+            title = title,
+            content = content
+        )
+        _notes.value += newNotePage
     }
 
-    fun updateNotePage(notePage: NotePage) {
-        _notePages.value = _notePages.value.map {
-            if (it.id == notePage.id) {
-                notePage
+    fun updateNotePage(
+        noteId: Int,
+        title: String,
+        content: String
+    ) {
+        val updatedNotePage = NotePage(
+            id = noteId,
+            title = title,
+            content = content
+        )
+        _notes.value = _notes.value.map { notePage ->
+            if (notePage.id == noteId) {
+                updatedNotePage
             } else {
-                it
+                notePage
             }
+        }
+    }
+
+    fun deleteNotePage(
+        noteId: Int
+    ) {
+        _notes.value = _notes.value.filter { notePage ->
+            notePage.id != noteId
         }
     }
 }

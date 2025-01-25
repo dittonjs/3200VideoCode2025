@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.notepages.repositories.NotePagesRepository
 import com.example.notepages.ui.screens.NoteModificationScreen
 import com.example.notepages.ui.screens.NotesScreen
 import com.example.notepages.ui.theme.NotePagesTheme

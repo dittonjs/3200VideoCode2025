@@ -1,35 +1,78 @@
 package com.example.notepages.viewmodels
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import com.example.notepages.models.NotePage
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.notepages.NotePagesApplication
+
 import com.example.notepages.repositories.NotePagesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class NoteModificationScreenViewModel: ViewModel() {
-    private val _notePage = MutableStateFlow<NotePage?>(null)
-    val notePage: StateFlow<NotePage?> = _notePage
+
+class NoteModificationScreenViewModel(
+    private val noteId: Int?,
+    private val notePagesRepository: NotePagesRepository
+): ViewModel() {
+    private val _title = MutableStateFlow("")
+    private val _content = MutableStateFlow("")
+
+    val title: StateFlow<String> = _title
+    val content: StateFlow<String> = _content
+
+    fun setTitle(title: String) {
+        _title.value = title
+    }
+
+    fun setContent(content: String) {
+        _content.value = content
+    }
+
+    fun saveNote() {
+        if (noteId != null) {
+            notePagesRepository.updateNotePage(
+                noteId,
+                _title.value,
+                _content.value
+            )
+        } else {
+            notePagesRepository.addNotePage(
+                _title.value,
+                _content.value
+            )
+        }
+    }
 
     init {
-        viewModelScope.launch {
-            NotePagesRepository.notePages.collect {
-                _notePage.value = it.find {
-                    it.id == Destinations.NoteModification.noteId
+        if (noteId != null) {
+            viewModelScope.launch {
+                notePagesRepository.notes.collect { notes ->
+                    val note = notes.find { it.id == noteId }
+                    if (note != null) {
+                        _title.value = note.title
+                        _content.value = note.content
+                    }
                 }
             }
         }
     }
 
+    companion object {
+        val NOTE_ID_KEY = object : CreationExtras.Key<Int?> {}
 
-    fun addNotePage(notePage: NotePage) {
-        NotePagesRepository.addNotePage(notePage)
+        val Factory = viewModelFactory {
+            initializer {
+                val noteId = this[NOTE_ID_KEY]
+                val application = this[APPLICATION_KEY] as NotePagesApplication
+                NoteModificationScreenViewModel(
+                    noteId,
+                    application.notePagesRepository
+                )
+            }
+        }
     }
-
-    fun updateNotePage(notePage: NotePage) {
-        NotePagesRepository.updateNotePage(notePage)
-    }
-
 }
